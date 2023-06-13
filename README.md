@@ -1,7 +1,7 @@
 
-## Project Title: Humerus Morphing and Completion
+## Humerus Morphing and Completion
 
-This project provides a Python script for morphing and completing partial humerus models using a template. The script uses 3D point cloud registration techniques with the Open3D library to align and merge the partial humerus model with a complete template. The script reads in two 3D models, converts them into point clouds, and then aligns them using a combination of global and local (refined) registration methods. The script also includes a deformable registration method using the bcpd algorithm.
+This repo provides a pipeline for morphing and completing partial humerus models using a template. The script uses 3D point cloud registration techniques with the Open3D library to align and merge the partial humerus model with a complete template. The script reads in two 3D models, converts them into point clouds, and then aligns them using a combination of global and local (refined) registration methods. The script also includes a deformable registration method using the bcpd algorithm.
 
 
 ### Prerequisites
