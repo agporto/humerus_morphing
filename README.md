@@ -50,6 +50,9 @@ Ready to go. The compilation is not required. Use the binary file `bcpd.exe` in 
 The binary file was created by GCC included in the 32-bit version of the MinGW system.
 Therefore, it might be quite slower than the one compiled in a Mac/Linux system.
 
+**Note that in the Jupyter notebook, remove ".\" from .\bcpd .\target.txt and .\source.txt
+Furthermore, as described in the bcpd README file, ensure that the current director is set to the bcpd folder when running the Jupyter script, and that all meshes are included in that folder.**
+
 #### MacOS and Linux
 
 1. Install OpenMP and the LAPACK library if not installed. If your machine is a Mac, install Xcode, Xcode command-line tools,
