@@ -10,8 +10,8 @@ import constants.constants as CONST
 
 ### FUNCTIONS ###
 def load_meshes():
-        source_mesh = o3d.io.read_triangle_mesh("./meshes/O35_M_humerus_source.stl")
-        target_mesh = o3d.io.read_triangle_mesh("./meshes/U35_F_humerus_partial_target.stl")
+        source_mesh = o3d.io.read_triangle_mesh("../meshes/O35_M_humerus_source.stl")
+        target_mesh = o3d.io.read_triangle_mesh("../meshes/U35_F_humerus_partial_target.stl")
         return source_mesh, target_mesh
 
 def convert_to_point_cloud(mesh: o3d.geometry.TriangleMesh):
@@ -75,27 +75,27 @@ if __name__ == "__main__":
 
     draw_registration_result(source_pcd_downsampled, target_pcd_downsampled, result_ransac.transformation)
 
-    result_icp = Registration.refine_registration(source_pcd, target_pcd, voxel_size, result_ransac)
+    result_icp = Registration.refine_registration(source_pcd, target_pcd,result_ransac, voxel_size)
     print(result_icp)
     draw_registration_result(source_pcd, target_pcd, result_icp.transformation)
     
     # Deformable registration
-    # deformed = Registration.deformable_registration(mesh.transform(result_icp.transformation),target_mesh)
-    # deformed.compute_vertex_normals()
-    # target_mesh.compute_vertex_normals()
-    # deformed.paint_uniform_color([0,0.706, 0])
-    # o3d.visualization.draw_geometries([deformed, target_mesh])
+    deformed = Registration.deformable_registration(source_mesh.transform(result_icp.transformation),target_mesh)
+    deformed.compute_vertex_normals()
+    target_mesh.compute_vertex_normals()
+    deformed.paint_uniform_color([0,0.706, 0])
+    o3d.visualization.draw_geometries([deformed, target_mesh])
 
-    # # Combine meshes (alternative - to crop the first before merging)
-    # combined = deformed + target_mesh
-    # combined.compute_vertex_normals()
-    # combined.paint_uniform_color([0,0.706, 0])
-    # o3d.visualization.draw_geometries([combined])
+    # Combine meshes (alternative - to crop the first before merging)
+    combined = deformed + target_mesh
+    combined.compute_vertex_normals()
+    combined.paint_uniform_color([0,0.706, 0])
+    o3d.visualization.draw_geometries([combined])
 
-    # # Simplify mesh (smoothing and filtering)
-    # mesh_smp = combined.simplify_vertex_clustering(voxel_size/3, contraction=o3d.geometry.SimplificationContraction.Average)
-    # mesh_smp = mesh_smp.filter_smooth_simple(number_of_iterations=2)
-    # mesh_smp = mesh_smp.filter_smooth_taubin(number_of_iterations=100)
-    # mesh_smp.compute_vertex_normals()
-    # o3d.visualization.draw_geometries([mesh_smp])and
+    # Simplify mesh (smoothing and filtering)
+    mesh_smp = combined.simplify_vertex_clustering(voxel_size/3, contraction=o3d.geometry.SimplificationContraction.Average)
+    mesh_smp = mesh_smp.filter_smooth_simple(number_of_iterations=2)
+    mesh_smp = mesh_smp.filter_smooth_taubin(number_of_iterations=100)
+    mesh_smp.compute_vertex_normals()
+    o3d.visualization.draw_geometries([mesh_smp])
 

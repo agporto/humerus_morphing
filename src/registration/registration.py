@@ -1,8 +1,10 @@
 import numpy as np
 import open3d as o3d
 import ctypes
+import glob
+import os
 
-__BCPD = ctypes.CDLL("../../bcpd/libbcpd.dylib")
+BCPD = ctypes.CDLL("./bcpd/libbcpd.dylib") # Note: Needs to be relative to the main run script, not this one
 
 class Registration:
 
@@ -89,30 +91,42 @@ class Registration:
             o3d.pipelines.registration.TransformationEstimationPointToPlane())
         return result
 
-    # @staticmethod
-    # def deformable_registration(source_pcd, target_pcd):
-    #     bcpd_result = __BCPD.main(targetPath, # TODO: JH - don't use the main method, rather use the 
-    #                 sourcePath, 
-    #                 "10", 
-    #                 "10", 
-    #                 "0.1"
-    #                 "140",
-    #                 "500",
-    #                 "1e-6",
-    #                 "p",
-    #                 "7",
-    #                 "0.3",
-    #                 "0.3",
-    #                 "ux", 
-    #                 "DB",
-    #                 "5000",
-    #                 "0.08" 
-    #                 "ux",
-    #                 "N1")
-    #     if (bcpd_result == None):
-    #         print("There was an error ")
-    #     deformed = o3d.geometry.TriangleMesh()
-    #     deformed.vertices = o3d.utility.Vector3dVector(np.asarray(bcpd_result))
-    #     deformed.triangles = source_pcd.triangles
-    #     return deformed
+    @staticmethod
+    def deformable_registration(source_pcd, target_pcd):
+        sourceArray = np.asarray(source_pcd.vertices,dtype=np.float32)
+        targetArray = np.asarray(target_pcd.vertices,dtype=np.float32)
+        targetPath = './target.txt'
+        sourcePath = './source.txt'
+        np.savetxt (targetPath, targetArray, delimiter=',')
+        np.savetxt (sourcePath, sourceArray, delimiter=',')
+
+        cmd = f'bcdp -x {targetPath} -y {sourcePath} -l10 -b10 -g0.1 -K140 -J500 -c1e-6 -p -d7 -e0.3 -f0.3 -ux -DB,5000,0.08 -ux -N1'
+
+        # Split the cmd string into individual arguments
+        cmd_parts = cmd.split()
+
+        # Convert the Python list of arguments to a C-style array of char pointers
+        argv_c = (ctypes.c_char_p * len(cmd_parts))()
+        argv_c[:] = [arg.encode('utf-8') for arg in cmd_parts]
+
+        # Set argc to the number of arguments
+        argc = len(cmd_parts)
+
+        BCPD.main.argtypes = (ctypes.c_int, ctypes.POINTER(ctypes.c_char_p))
+
+        # TODO: JH - Better usage, rather than the main method
+        # Might be considered in the future, but this should be enough, for now
+        BCPD.main(argc, argv_c)
+
+        bcpd_result = np.loadtxt('output_y.interpolated.txt')
+
+        for fl in glob.glob("output*.txt"):
+            os.remove(fl)
+        os.remove(targetPath)
+        os.remove(sourcePath)
+
+        deformed = o3d.geometry.TriangleMesh()
+        deformed.vertices = o3d.utility.Vector3dVector(np.asarray(bcpd_result))
+        deformed.triangles = source_pcd.triangles
+        return deformed
 
